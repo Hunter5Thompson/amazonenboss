@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import Home from "./components/Lobby";
-import Game from "./components/Game";
-
+import GameLogic from "./components/GameLogic";
 import Navbar from "./components/Navbar";
 import './App.css';
 
@@ -53,7 +52,7 @@ class App extends Component {
             </header>
             <main>
               {games.map((game) => (
-                <Game key={game.id} game={game} />
+                <GameLogic key={game.id} game={game} />
               ))}
             </main>
           </div>

@@ -3,7 +3,7 @@ import { Position } from "./Position";
 import { Direction } from "./Direction";
 import { Arrow } from "./Arrow";
 
-export class Game  {
+export class GameLogic  {
 
     private startTime: number;
     private timeLimit: number; // Zeitlimit in Millisekunden
