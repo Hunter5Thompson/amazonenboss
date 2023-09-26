@@ -1,5 +1,22 @@
+import { Direction } from './Direction';
+
 export class Position {
     constructor(public x: number, public y: number) {}
-    // Füge ein 'to' Property hinzu, wenn nötig
+
+    add(direction: Direction): Position {
+        switch (direction) {
+            case Direction.Up:
+                return new Position(this.x, this.y - 1);
+            case Direction.Down:
+                return new Position(this.x, this.y + 1);
+            case Direction.Left:
+                return new Position(this.x - 1, this.y);
+            case Direction.Right:
+                return new Position(this.x + 1, this.y);
+            default:
+                return this; // Falls keine gültige Richtung angegeben ist, bleibt die Position unverändert
+        }
+    }
     to?: string;
 }
+    

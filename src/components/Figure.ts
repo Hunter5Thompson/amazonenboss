@@ -81,8 +81,8 @@ export class Figure {
      * @param x X-Koordinate der neuen Position
      * @param y Y-Koordinate der neuen Position
      */
-    public setPosition(x: number, y: number): void {
-        this._position = { x, y };
+    public setPosition(newPosition: Position): void {
+        this._position = newPosition;
     }
 
     /**

@@ -7,6 +7,9 @@ export class Game  {
 
     private _size: number;
     private _figures: Figure[];
+    public hasMandatoryMove(color: string): boolean {
+        return true;
+    }
 
     constructor() {
         this._size = 10;
@@ -18,42 +21,52 @@ export class Game  {
      * @returns `true`, wenn ein Spieler gewonnen hat, `false` sonst.
      */
     public checkWinner(): boolean {
+        let whiteAlive = false;
+        let blackAlive = false;
+        let whiteHasMandatoryMove = false;
+        let blackHasMandatoryMove = false;
+    
         for (const figure of this._figures) {
-            if (figure.isAlive() && figure.getColor() === "rot") {
-                return false;
+            if (figure.isAlive()) {
+                const color = figure.getColor();
+                const moves = this.getMoves(figure); // Angenommen, getMoves gibt die möglichen Züge für die Figur zurück
+    
+                if (color === "white") {
+                    whiteAlive = true;
+                    if (moves.length > 0) {
+                        whiteHasMandatoryMove = true;
+                    }
+                } else if (color === "black") {
+                    blackAlive = true;
+                    if (moves.length > 0) {
+                        blackHasMandatoryMove = true;
+                    }
+                }
             }
         }
-
-        return true;
+    
+        // Ein Spieler hat gewonnen, wenn er noch lebende Figuren hat, aber der Gegner keine Züge mehr machen kann
+        return (whiteAlive && !blackHasMandatoryMove) || (blackAlive && !whiteHasMandatoryMove);
     }
-
-
-        /**
-     * Prüft, ob eine Amazone sich bewegen kann.
-     *
-     * @param amazone Amazone, die bewegt werden soll
-     * @param newPosition Neue Position der Amazone
-     * @returns `true`, wenn die Amazone sich bewegen kann, `false` sonst.
-     */
-        public checkMoveAmazone(amazone: Figure, newPosition: Position): boolean {
-            if (!amazone.isAlive()) {
-                return false;
-            }
     
-            if (newPosition.x < 0 || newPosition.x >= this._size) {
-                return false;
-            }
-    
-            if (newPosition.y < 0 || newPosition.y >= this._size) {
-                return false;
-            }
-    
-            if (this._figures.some((figure) => figure.isAtPosition(newPosition))) {
-                return false;
-            }
-    
-            return true;
+    public checkMove(figure: Figure, newPosition: Position): boolean {
+        // Prüfen, ob die Position innerhalb des Spielfelds liegt
+        if (newPosition.x < 0 || newPosition.x >= this._size || newPosition.y < 0 || newPosition.y >= this._size) {
+          return false;
         }
+      
+        // Prüfen, ob das Zielfeld bereits von einer anderen Figur oder einem Pfeil besetzt ist
+        if (this._figures.some((existingFigure) => existingFigure.isAtPosition(newPosition))) {
+          return false;
+        }
+      
+        // Weitere Regeln können hier hinzugefügt werden
+        // ...
+      
+        return true;
+      }
+      
+    
 
             /**
      * Prüft, ob ein Pfeil sich bewegen kann.
@@ -121,24 +134,67 @@ export class Game  {
             // TODO: Implementieren
         }
 
-        /**
-     * Führt einen Spielzug für einen Spieler aus.
+     /**
+     * Führt einen Zug aus.
      *
-     * @param player Spieler, der den Spielzug ausführt
+     * @param figure Figur, die bewegt werden soll
+     * @param newPosition Neue Position der Figur
      */
-        public makeMove(player: string): void {
-            // TODO: Implementieren
+     public makeMove(figure: Figure, newPosition: Position): boolean {
+        // Überprüfe, ob der Zug gültig ist
+        if (!this.checkMove(figure, newPosition)) {
+            return false;
         }
+    
+        // Setze die neue Position der Figur
+        figure.setPosition(newPosition);
+    
+        // Überprüfe, ob der Spieler nach dem Zug noch weitere Züge machen muss (Zugpflicht)
+        const color = figure.getColor();
+        const hasMandatoryMove = this.hasMandatoryMove(color);
+    
+        if (!hasMandatoryMove) {
+            // Wenn der Spieler keine weiteren Züge machen muss, ist der Zug erfolgreich abgeschlossen
+            return true;
+        } else {
+            // Wenn der Spieler noch weitere Züge machen muss, ist der Zug nicht erfolgreich
+            return false;
+        }
+    }
+    
+    
 
-        /**
-     * Gibt alle möglichen Spielzüge für einen Spieler zurück.
+     /**
+     * Gibt alle möglichen Züge für eine Amazone zurück.
      *
-     * @param player Spieler, für den die Spielzüge ermittelt werden sollen
-     * @returns Liste aller möglichen Spielzüge
+     * @param figure Amazone, für die die möglichen Züge zurückgegeben werden sollen
+     * @returns Array aller möglichen Züge
      */
-        public getMoves(player: string): Move[] {
-            // TODO: Implementieren
+     public getMoves(figure: Figure): Position[] {
+        let moves: Position[] = [];
+    
+        for (let x = 0; x < this._size; x++) {
+            for (let y = 0; y < this._size; y++) {
+                if (this.checkMove(figure, new Position(x, y))) {
+                    moves.push(new Position(x, y));
+                }
+            }
         }
+    
+        if (figure instanceof Arrow) {
+            const newPositions: Position[] = [];
+    
+            for (const move of moves) {
+                newPositions.push(move.add(figure.getDirection()));
+            }
+    
+            moves = newPositions;
+        }
+    
+        return moves;
+    }
+    
+
 
         /**
      * Prüft, ob das Spiel vorbei ist.
@@ -149,25 +205,46 @@ export class Game  {
             // TODO: Implementieren
         }
 
-        /**
-     * Prüft, ob ein Spielzug gültig ist.
+    /**
+     * Bewegt eine Dame.
      *
-     * @param player Spieler, der den Spielzug ausführen möchte
-     * @param move Spielzug, der überprüft werden soll
-     * @returns `true`, wenn der Spielzug gültig ist, `false` sonst.
+     * @param amazone Dame, die bewegt werden soll
+     * @param newPosition Neue Position der Dame
      */
-        public checkMove(player: string, move: Move): boolean {
-            // TODO: Implementieren
-        }
+    public moveAmazone(amazone: Figure, newPosition: Position): void {
+        this.makeMove(amazone, newPosition);
+    }
+
+
 
         /**
-     * Bewegt eine Amazone.
+     * Prüft, ob eine Dame sich bewegen kann.
      *
-     * @param player Spieler, der die Amazone bewegt
-     * @param move Spielzug, der die Bewegung der Amazone beschreibt
-     * @returns `true`, wenn die Amazone bewegt werden konnte, `false` sonst.
+     * @param amazone Dame, die bewegt werden soll
+     * @param newPosition Neue Position der Dame
+     * @returns `true`, wenn die Dame sich bewegen kann, `false` sonst.
      */
-        public moveAmazone(player: string, move: Move): boolean {
-            // TODO: Implementieren
+        public checkMoveAmazone(amazone: Figure, newPosition: Position): boolean {
+            if (!amazone.isAlive()) {
+                return false;
+            }
+    
+            if (newPosition.x < 0 || newPosition.x >= this._size) {
+                return false;
+            }
+    
+            if (newPosition.y < 0 || newPosition.y >= this._size) {
+                return false;
+            }
+    
+            for (const step of this.getMoves(amazone)) {
+                if (step === newPosition) {
+                    return true;
+                }
+            }
+    
+            return false;
         }
+
+        
 }
