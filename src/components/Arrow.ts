@@ -1,22 +1,24 @@
 import { Position } from "./Position";
 import { Direction } from "./Direction";
+import { Figure } from "./Figure";
 
+export class Arrow extends Figure {
 
-export class Arrow {
+    protected _position: Position;
+    protected _isAlive: boolean;
+    protected _isHit: boolean;
+    protected _color: string;
+    protected _owner: string;
+    private direction: Direction;
 
-    private _position: Position;
-    private _isAlive: boolean;
-    private _isHit: boolean;
-    private _color: string;
-    private _owner: string;
-
-    constructor(position: Position) {
-        this._position = position;
+    constructor(position: Position, direction: Direction) {
+        super(position, "white");
         this._isAlive = true;
         this._isHit = false;
         this._color = "red";
         this._owner = "Spieler 1";
     }
+
     
         /**
      * Gibt die Position des Pfeils zurück.
@@ -33,8 +35,8 @@ export class Arrow {
      * @param x X-Koordinate der neuen Position
      * @param y Y-Koordinate der neuen Position
      */
-    public setPosition(x: number, y: number): void {
-        this._position = { x, y };
+    public setPosition(newPosition: Position): void {
+        this._position = newPosition;
     }
 
         /**
@@ -46,6 +48,12 @@ export class Arrow {
             this._isHit = isHit;
         }
         
+        public getDirection(): Direction {
+            return this.direction;
+        }
+
+
+
     /**
      * Prüft, ob der Pfeil noch am Leben ist.
      *

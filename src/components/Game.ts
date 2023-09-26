@@ -5,15 +5,40 @@ import { Arrow } from "./Arrow";
 
 export class Game  {
 
+    private startTime: number;
+    private timeLimit: number; // Zeitlimit in Millisekunden
     private _size: number;
     private _figures: Figure[];
+    private _arrows: Arrow[]; // Liste der Pfeile
     public hasMandatoryMove(color: string): boolean {
         return true;
     }
+    private currentPlayer: string;
+    private addArrowToBoard(arrow: Arrow): void {
+        // Füge den Pfeil zur Liste hinzu
+        this._arrows.push(arrow);
+    }
+
+    private isValidMove(finalPosition: Position): boolean {
+        // Überprüfe, ob die Position innerhalb des Spielfelds liegt
+        if (finalPosition.x < 0 || finalPosition.x >= this._size || finalPosition.y < 0 || finalPosition.y >= this._size) {
+            return false;
+        }
+    
+        // Überprüfe, ob das Zielfeld bereits von einer anderen Figur oder einem Pfeil besetzt ist
+        if (this._figures.some((existingFigure) => existingFigure.isAtPosition(finalPosition))) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+
 
     constructor() {
         this._size = 10;
         this._figures = [];
+        this._arrows = []; // Initialisiere die Pfeilliste
     }
     /**
      * Prüft, ob ein Spieler gewonnen hat.
@@ -122,6 +147,30 @@ export class Game  {
     
             return false;
         }
+        public isValidArrowShoot(finalPosition: Position, direction: Direction): boolean {
+            // Überprüfe, ob die Endposition innerhalb des Spielbretts liegt
+            if (finalPosition.x < 0 || finalPosition.x >= this._size || finalPosition.y < 0 || finalPosition.y >= this._size) {
+                return false;
+            }
+        
+            // Überprüfe, ob die Endposition bereits von einer anderen Figur oder einem Pfeil besetzt ist
+            for (const figure of this._figures) {
+                if (figure.getPosition().equals(finalPosition)) {
+                    return false;
+                }
+            }
+        
+            for (const arrow of this._arrows) {
+                if (arrow.getPosition().equals(finalPosition)) {
+                    return false;
+                }
+            }
+      
+            return true;
+        }
+ 
+        
+
 
         /**
      * Schießt einen Pfeil ab.
@@ -130,9 +179,27 @@ export class Game  {
      * @param move Spielzug, der den Abschuss des Pfeils beschreibt
      * @returns `true`, wenn der Pfeil abgeschossen werden konnte, `false` sonst.
      */
-        public shootArrow(player: string, move: Move): boolean {
-            // TODO: Implementieren
+        public shootArrow(player: string, finalPosition: Position, direction: Direction): boolean {
+            // Schritt 1: Überprüfe, ob der Spieler an der Reihe ist
+            if (this.currentPlayer !== player) {
+                return false;
+            }
+        
+            // Schritt 2: Überprüfe die Gültigkeit des Zugs
+            if (!this.isValidArrowShoot(finalPosition, direction)){
+                return false;
+            }
+        
+            // Schritt 3: Füge den Pfeil zum Spielbrett hinzu
+            const arrow = new Arrow(finalPosition, direction);
+            this.addArrowToBoard(arrow);
+        
+            // Zug war erfolgreich
+            return true;
         }
+        
+        
+        
 
      /**
      * Führt einen Zug aus.
@@ -193,7 +260,16 @@ export class Game  {
     
         return moves;
     }
-    
+
+            /**
+     * Prüft, ob die Zeit vorbei ist.
+     *
+     * @returns `true`, wenn das Spiel vorbei ist, `false` sonst.
+     */
+    public isTimeUp(): boolean {
+        const currentTime = Date.now();
+        return currentTime - this.startTime >= this.timeLimit;
+    }
 
 
         /**
@@ -202,7 +278,10 @@ export class Game  {
      * @returns `true`, wenn das Spiel vorbei ist, `false` sonst.
      */
         public isGameOver(): boolean {
-            // TODO: Implementieren
+            if (this.checkWinner() || this.isTimeUp()) {
+                return true;
+            }
+            return false;
         }
 
     /**

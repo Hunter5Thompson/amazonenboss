@@ -17,6 +17,9 @@ export class Position {
                 return this; // Falls keine gültige Richtung angegeben ist, bleibt die Position unverändert
         }
     }
+    equals(other: Position): boolean {
+        return this.x === other.x && this.y === other.y;
+    }
     to?: string;
 }
     

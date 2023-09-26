@@ -3,11 +3,11 @@ import { Direction } from "./Direction";
 
 export class Figure {
 
-    private _position: Position;
-    private _isAlive: boolean;
-    private _isHit: boolean;
-    private _color: string;
-    private _owner: string;
+    protected _position: Position;
+    protected _isAlive: boolean;
+    protected _isHit: boolean;
+    protected _color: string;
+    protected _owner: string;
     public type: "white" | "black";
 
   
