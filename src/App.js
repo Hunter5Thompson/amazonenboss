@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import Home from "./components/Lobby";
-import GameLogic from "./components/GameLogic";
+import Lobby from "./components/Lobby";
 import Navbar from "./components/Navbar";
 import './App.css';
 
@@ -22,9 +21,10 @@ class App extends Component {
     }
 
     // Lade die Liste aller aktuellen Spiele.
-    fetch("/games")
+    fetch("https://gruppe15.toni-barth.com/games/")
       .then((response) => response.json())
-      .then((games) => this.setState({ games }));
+      .then((games) => this.setState({ games }))
+      .catch((error) => console.error("Error fetching games:", error));
   }
 
   handleLogout = () => {
@@ -39,7 +39,7 @@ class App extends Component {
   };
 
   render() {
-    const { isLoggedIn, user, games } = this.state;
+    const { isLoggedIn } = this.state;
 
     return (
       <div className="app">
@@ -51,9 +51,7 @@ class App extends Component {
               <button onClick={this.handleLogout}>Abmelden</button>
             </header>
             <main>
-              {games.map((game) => (
-                <GameLogic key={game.id} game={game} />
-              ))}
+              <Lobby />
             </main>
           </div>
         )}
@@ -63,9 +61,36 @@ class App extends Component {
               <h1>Anmelden</h1>
             </header>
             <main>
-              <input type="text" placeholder="Benutzername" />
-              <input type="password" placeholder="Passwort" />
-              <button>Anmelden</button>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const username = e.target.username.value;
+                const password = e.target.password.value;
+                
+                // Simple validation
+                if (username && password) {
+                  // Create a user object
+                  const user = {
+                    username,
+                    name: username,
+                    email: `${username}@example.com`
+                  };
+                  
+                  // Store user in localStorage
+                  localStorage.setItem("user", JSON.stringify(user));
+                  
+                  // Update state
+                  this.setState({
+                    isLoggedIn: true,
+                    user
+                  });
+                } else {
+                  alert("Bitte geben Sie einen Benutzernamen und ein Passwort ein.");
+                }
+              }}>
+                <input type="text" name="username" placeholder="Benutzername" required />
+                <input type="password" name="password" placeholder="Passwort" required />
+                <button type="submit">Anmelden</button>
+              </form>
             </main>
           </div>
         )}

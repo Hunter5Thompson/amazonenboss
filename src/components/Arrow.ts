@@ -17,6 +17,7 @@ export class Arrow extends Figure {
         this._isHit = false;
         this._color = "red";
         this._owner = "Spieler 1";
+        this.direction = direction;
     }
 
     

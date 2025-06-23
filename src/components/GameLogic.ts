@@ -25,10 +25,16 @@ export class GameLogic  {
             return false;
         }
     
-        // Überprüfe, ob das Zielfeld bereits von einer anderen Figur oder einem Pfeil besetzt ist
+        // Überprüfe, ob das Zielfeld bereits von einer anderen Figur besetzt ist
         if (this._figures.some((existingFigure) => existingFigure.isAtPosition(finalPosition))) {
             return false;
         }
+        
+        // Überprüfe, ob das Zielfeld bereits von einem Pfeil besetzt ist
+        if (this._arrows.some((arrow) => arrow.getPosition().equals(finalPosition))) {
+            return false;
+        }
+        
         return true;
     }
     
@@ -39,6 +45,9 @@ export class GameLogic  {
         this._size = 10;
         this._figures = [];
         this._arrows = []; // Initialisiere die Pfeilliste
+        this.startTime = Date.now();
+        this.timeLimit = 600000; // 10 minutes in milliseconds
+        this.currentPlayer = "white"; // Default starting player
     }
     /**
      * Prüft, ob ein Spieler gewonnen hat.
@@ -80,8 +89,14 @@ export class GameLogic  {
           return false;
         }
       
-        // Prüfen, ob das Zielfeld bereits von einer anderen Figur oder einem Pfeil besetzt ist
-        if (this._figures.some((existingFigure) => existingFigure.isAtPosition(newPosition))) {
+        // Prüfen, ob das Zielfeld bereits von einer anderen Figur besetzt ist
+        if (this._figures.some((existingFigure) => 
+            existingFigure !== figure && existingFigure.isAtPosition(newPosition))) {
+          return false;
+        }
+        
+        // Prüfen, ob das Zielfeld bereits von einem Pfeil besetzt ist
+        if (this._arrows.some((arrow) => arrow.getPosition().equals(newPosition))) {
           return false;
         }
       
@@ -153,17 +168,14 @@ export class GameLogic  {
                 return false;
             }
         
-            // Überprüfe, ob die Endposition bereits von einer anderen Figur oder einem Pfeil besetzt ist
-            for (const figure of this._figures) {
-                if (figure.getPosition().equals(finalPosition)) {
-                    return false;
-                }
+            // Überprüfe, ob die Endposition bereits von einer anderen Figur besetzt ist
+            if (this._figures.some(figure => figure.getPosition().equals(finalPosition))) {
+                return false;
             }
         
-            for (const arrow of this._arrows) {
-                if (arrow.getPosition().equals(finalPosition)) {
-                    return false;
-                }
+            // Überprüfe, ob die Endposition bereits von einem Pfeil besetzt ist
+            if (this._arrows.some(arrow => arrow.getPosition().equals(finalPosition))) {
+                return false;
             }
       
             return true;
@@ -317,7 +329,7 @@ export class GameLogic  {
             }
     
             for (const step of this.getMoves(amazone)) {
-                if (step === newPosition) {
+                if (step.equals(newPosition)) {
                     return true;
                 }
             }

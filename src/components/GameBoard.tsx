@@ -33,14 +33,22 @@ const GameBoard = () => {
   }, [gameId]);
 
   useEffect(() => {
-    axios
-      .get("/api/game/moves")
-      .then((response) => {
-        setMoves(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    // Use a try-catch block to handle potential errors
+    const fetchMoves = async () => {
+      try {
+        // Use the correct API endpoint
+        const response = await axios.get("https://gruppe15.toni-barth.com/games/");
+        // Initialize empty moves array if no data is available
+        const movesData = response.data?.moves || [];
+        setMoves(movesData.map((move: any) => new Position(move.x, move.y)));
+      } catch (error) {
+        console.error("Error fetching moves:", error);
+        // Set empty array on error
+        setMoves([]);
+      }
+    };
+    
+    fetchMoves();
   }, [figures]);
 
   return (
@@ -84,11 +92,27 @@ const GameBoard = () => {
 
 const generateRandomFigures = (size: number) => {
   const figures: Figure[] = [];
-  for (let i = 0; i < size * size; i++) {
-    const figure = new Figure(new Position(Math.floor(Math.random() * size), Math.floor(Math.random() * size)), Math.random() > 0.5 ? "white" : "black");
-    figure.setColor(Math.random() > 0.5 ? "white" : "black"); // Setze die Farbe hier
+  // Generate a reasonable number of figures (e.g., 4 white and 4 black)
+  const numFiguresPerColor = 4;
+  
+  // Generate white figures
+  for (let i = 0; i < numFiguresPerColor; i++) {
+    const figure = new Figure(
+      new Position(Math.floor(Math.random() * size), Math.floor(Math.random() * size)), 
+      "white"
+    );
     figures.push(figure);
   }
+  
+  // Generate black figures
+  for (let i = 0; i < numFiguresPerColor; i++) {
+    const figure = new Figure(
+      new Position(Math.floor(Math.random() * size), Math.floor(Math.random() * size)), 
+      "black"
+    );
+    figures.push(figure);
+  }
+  
   return figures;
 };
 

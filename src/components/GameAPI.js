@@ -55,7 +55,19 @@ export default class APICalls {
   }
 
   async getUserInput(question) {
-    const input = window.prompt(question);
-    return parseInt(input);
+    try {
+      // Try to use window.prompt if in browser environment
+      if (typeof window !== 'undefined' && window.prompt) {
+        const input = window.prompt(question);
+        return input ? parseInt(input, 10) || 10 : 10; // Default to 10 if parsing fails
+      } else {
+        // Default value for non-browser environments
+        console.log(question + " (Using default value: 10)");
+        return 10;
+      }
+    } catch (error) {
+      console.error("Error getting user input:", error);
+      return 10; // Default fallback value
+    }
   }
 }
