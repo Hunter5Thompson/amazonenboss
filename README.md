@@ -1,4 +1,15 @@
-# Getting Started with Create React App
+# Amazon Game
+
+A React-based implementation of the Amazon board game.
+
+## Bug Fixes
+
+This version includes fixes for:
+- Arrow initialization
+- Game board rendering
+- Game logic position comparison
+- API integration
+- Component dependencies
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
